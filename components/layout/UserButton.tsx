@@ -1,3 +1,4 @@
+"use client";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -8,12 +9,15 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { UserRound, User, Pencil, Shield, LogOut } from "lucide-react";
 import { FaRegBookmark } from "react-icons/fa";
+import { signOut, useSession } from "next-auth/react";
 const UserButton = () => {
+  const session = useSession();
+  const imageUrl = session.data?.user.image || "";
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
         <Avatar>
-          <AvatarImage src="" />
+          <AvatarImage src={imageUrl} />
           <AvatarFallback className="border-2 border-slate-500 dark:border-slate-50">
             <UserRound />
           </AvatarFallback>
@@ -49,7 +53,7 @@ const UserButton = () => {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          <button className="flex items-center gap-2">
+          <button onClick={() => signOut()} className="flex items-center gap-2">
             <LogOut size={18} />
             Sign Out
           </button>
