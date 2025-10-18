@@ -6,6 +6,7 @@ import NavBar from "@/components/layout/NavBar";
 import { ThemeProvider } from "next-themes";
 import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
+import { EdgeStoreProvider } from "@/lib/edgestore";
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
@@ -26,27 +27,29 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <SessionProvider session={session}>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          className={cn(
-            "antialiased flex flex-col min-h-screen px-2",
-            poppins.variable
-          )}
-        >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
+    <EdgeStoreProvider>
+      <SessionProvider session={session}>
+        <html lang="en" suppressHydrationWarning>
+          <body
+            className={cn(
+              "antialiased flex flex-col min-h-screen px-2",
+              poppins.variable
+            )}
           >
-            <NavBar />
-            <main className="flex-grow ">{children}</main>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NavBar />
+              <main className="flex-grow ">{children}</main>
 
-            <footer>...</footer>
-          </ThemeProvider>
-        </body>
-      </html>
-    </SessionProvider>
+              <footer>...</footer>
+            </ThemeProvider>
+          </body>
+        </html>
+      </SessionProvider>
+    </EdgeStoreProvider>
   );
 }
