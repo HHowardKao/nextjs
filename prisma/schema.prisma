@@ -13,6 +13,7 @@ model User {
   emailVerified DateTime?
   image         String?
   accounts      Account[]
+  blogs         Blog[]
 
  
   createdAt DateTime @default(now())
@@ -64,4 +65,16 @@ model PasswordResetToken{
 enum UserRole{
   USER
   ADMIN
+}
+
+model Blog{
+  id String @id @default(cuid())
+  userId String
+  title String
+  content String
+  coverImage String?
+  tags String[]
+  isPublished Boolean @default(false) 
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

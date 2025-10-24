@@ -6,12 +6,15 @@ import { useSession } from "next-auth/react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import FormField from "../common/FormField";
 import AddCover from "./AddCover";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import CoverImage from "./CoverImage";
 import { tags } from "@/lib/tags";
 import BlockNoteEditor from "./editor/BlockNoteEditor";
 import Button from "../common/Button";
 import Alert from "../common/Alert";
+import { start } from "repl";
+import { create } from "domain";
+import { createBlog } from "@/actions/blogs/create-blog";
 
 const CreateBlogForm = () => {
   const session = useSession();
@@ -20,6 +23,8 @@ const CreateBlogForm = () => {
   const [content, setContent] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
   const [error, setError] = useState<string | undefined>();
+  const [isPublishing, startPublishing] = useTransition();
+  const [isSavingDraft, startSavingDraft] = useTransition();
   console.log(uploadedCover);
   const {
     register,
@@ -60,8 +65,48 @@ const CreateBlogForm = () => {
 
   const onPublish: SubmitHandler<BlogSchemaType> = (data) => {
     console.log("data", data);
+    setSuccess("");
+    setError("");
+    if (data.tags.length > 4) {
+      return setError("Select up to 4 tags only!");
+    }
+    startPublishing(() => {
+      createBlog({ ...data, isPublished: true })
+        .then((data) => {
+          if (data.error) {
+            setError(data.error);
+          }
+          if (data.success) {
+            setSuccess(data.success);
+          }
+        })
+        .catch((error) => {
+          console.error("Error creating blog:", error);
+          setError("An unexpected error occurred. Please try again.");
+        });
+    });
   };
+  const onSaveDraft: SubmitHandler<BlogSchemaType> = (data) => {
+    console.log("data", data);
+    setSuccess("");
+    setError("");
 
+    startPublishing(() => {
+      createBlog({ ...data, isPublished: false })
+        .then((data) => {
+          if (data.error) {
+            setError(data.error);
+          }
+          if (data.success) {
+            setSuccess(data.success);
+          }
+        })
+        .catch((error) => {
+          console.error("Error creating blog:", error);
+          setError("An unexpected error occurred. Please try again.");
+        });
+    });
+  };
   console.log("errors", errors);
   return (
     <form
@@ -127,8 +172,16 @@ const CreateBlogForm = () => {
             <Button type="button" label="Delete" />
           </div>
           <div className="flex  gap-4">
-            <Button type="submit" label="Publish" className="bg-blue-700" />
-            <Button type="button" label="Save as Draft" />
+            <Button
+              type="submit"
+              label={isPublishing ? "Publishing..." : "Publish"}
+              className="bg-blue-700"
+            />
+            <Button
+              type="button"
+              label={isSavingDraft ? "Saving..." : "Save as Draft"}
+              onClick={handleSubmit(onSaveDraft)}
+            />
           </div>
         </div>
       </div>
