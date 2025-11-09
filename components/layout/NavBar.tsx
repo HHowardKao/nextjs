@@ -7,13 +7,15 @@ import Notifications from "./Notifications";
 import UserBotton from "./UserButton";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Tags from "./Tags";
 
 const NavBar = () => {
   const session = useSession();
   const isLoggedIn = session.status === "authenticated";
   const path = usePathname();
+  const router = useRouter();
   console.log("Session>>>", session);
   useEffect(() => {
     if (!isLoggedIn && path) {
@@ -29,7 +31,10 @@ const NavBar = () => {
     <nav className="sticky top-0 border-b z-50 bg-white dark:bg-slate-950">
       <Container>
         <div className="flex justify-between items-center gap-8">
-          <div className="flex items-center gap-1 cursor-pointer">
+          <div
+            className="flex items-center gap-1 cursor-pointer"
+            onClick={() => router.push("/blog/feed/1")}
+          >
             <MdNoteAlt size={24} />
             <div className="font-bold text-xl">WEBDEV.blog</div>
           </div>
@@ -47,6 +52,7 @@ const NavBar = () => {
           </div>
         </div>
       </Container>
+      <Tags />
     </nav>
   );
 };

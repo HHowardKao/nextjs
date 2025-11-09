@@ -2,14 +2,27 @@
 
 import { db } from "@/lib/db";
 
-export const getPublishedBlogs = async ({ page = 1, limit = 5 }) => {
+export const getPublishedBlogs = async ({
+  page = 1,
+  limit = 5,
+  searchObj,
+}: {
+  page: number;
+  limit: number;
+  searchObj: { tag: string; title: string };
+}) => {
   const skip = (page - 1) * limit;
+  const { tag, title } = searchObj;
   try {
     const blogs = await db.blog.findMany({
       skip,
       take: limit,
       orderBy: { createdAt: "desc" },
-      where: { isPublished: true },
+      where: {
+        title: { contains: title, mode: "insensitive" },
+        isPublished: true,
+        ...(tag ? { tags: { has: tag } } : {}),
+      },
       include: {
         user: {
           select: {
@@ -23,7 +36,9 @@ export const getPublishedBlogs = async ({ page = 1, limit = 5 }) => {
 
     const totalBlogsCount = await db.blog.count({
       where: {
+        title: { contains: title, mode: "insensitive" },
         isPublished: true,
+        ...(tag ? { tags: { has: tag } } : {}),
       },
     });
     const hasMore = totalBlogsCount > page * limit;

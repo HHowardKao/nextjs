@@ -12,11 +12,11 @@ import { tags } from "@/lib/tags";
 import BlockNoteEditor from "./editor/BlockNoteEditor";
 import Button from "../common/Button";
 import Alert from "../common/Alert";
-import { start } from "repl";
-import { create } from "domain";
 import { createBlog } from "@/actions/blogs/create-blog";
+import { Blog } from "@prisma/client";
+import { editBlog } from "@/actions/blogs/edit-blog";
 
-const CreateBlogForm = () => {
+const CreateBlogForm = ({ blog }: { blog?: Blog }) => {
   const session = useSession();
   const userId = session.data?.user.userId;
   const [uploadedCover, setupLoadedCover] = useState<string>();
@@ -33,10 +33,19 @@ const CreateBlogForm = () => {
     setValue,
   } = useForm<BlogSchemaType>({
     resolver: zodResolver(BlogSchema),
-    defaultValues: {
-      userId,
-      isPublished: false,
-    },
+    defaultValues: blog
+      ? {
+          userId: blog.userId,
+          title: blog.title,
+          content: blog.content,
+          coverImage: blog.coverImage || undefined,
+          tags: blog.tags,
+          isPublished: blog.isPublished,
+        }
+      : {
+          userId,
+          isPublished: false,
+        },
   });
 
   useEffect(() => {
@@ -59,6 +68,12 @@ const CreateBlogForm = () => {
     }
   }, [content]);
 
+  useEffect(() => {
+    if (blog?.coverImage) {
+      setupLoadedCover(blog.coverImage);
+    }
+  }, [blog?.coverImage]);
+
   const onChange = (content: string) => {
     setContent(content);
   };
@@ -71,40 +86,51 @@ const CreateBlogForm = () => {
       return setError("Select up to 4 tags only!");
     }
     startPublishing(() => {
-      createBlog({ ...data, isPublished: true })
-        .then((data) => {
+      if (blog) {
+        editBlog({ ...data, isPublished: true }, blog.id).then((data) => {
           if (data.error) {
             setError(data.error);
           }
           if (data.success) {
             setSuccess(data.success);
           }
-        })
-        .catch((error) => {
-          console.error("Error creating blog:", error);
-          setError("An unexpected error occurred. Please try again.");
         });
+      } else {
+        createBlog({ ...data, isPublished: true }).then((data) => {
+          if (data.error) {
+            setError(data.error);
+          }
+          if (data.success) {
+            setSuccess(data.success);
+          }
+        });
+      }
     });
   };
   const onSaveDraft: SubmitHandler<BlogSchemaType> = (data) => {
-    console.log("data", data);
     setSuccess("");
     setError("");
 
-    startPublishing(() => {
-      createBlog({ ...data, isPublished: false })
-        .then((data) => {
+    startSavingDraft(() => {
+      if (blog) {
+        editBlog({ ...data, isPublished: false }, blog.id).then((data) => {
           if (data.error) {
             setError(data.error);
           }
           if (data.success) {
             setSuccess(data.success);
           }
-        })
-        .catch((error) => {
-          console.error("Error creating blog:", error);
-          setError("An unexpected error occurred. Please try again.");
         });
+      } else {
+        createBlog({ ...data, isPublished: false }).then((data) => {
+          if (data.error) {
+            setError(data.error);
+          }
+          if (data.success) {
+            setSuccess(data.success);
+          }
+        });
+      }
     });
   };
   console.log("errors", errors);
@@ -154,7 +180,10 @@ const CreateBlogForm = () => {
             </span>
           )}
         </fieldset>
-        <BlockNoteEditor onChange={onChange} />
+        <BlockNoteEditor
+          onChange={onChange}
+          initialContent={blog?.content ? blog.content : ""}
+        />
         {errors.content && errors.content.message && (
           <span className="text-sm text-rose-400">
             {errors.content.message}
