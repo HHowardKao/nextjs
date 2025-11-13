@@ -5,6 +5,10 @@ import Pagination from "./Pagination";
 
 export type BlogWithUser = Blog & {
   user: Pick<User, "id" | "name" | "image">;
+  _count: {
+    claps: number;
+  };
+  claps: { id: string }[];
 };
 
 interface ListBlogsProps {

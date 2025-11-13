@@ -47,7 +47,7 @@ const BlogContent = async ({ params }: BlogContentProps) => {
       </div>
       <div className="flex flex-col gap-2">
         <Separator />
-        <Reactions />
+        <Reactions blog={blog} />
         <Separator />
       </div>
       <h2 className="text-4xl font-bold">{blog.title}</h2>

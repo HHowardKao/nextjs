@@ -34,7 +34,7 @@ const BlogCard = ({
               ))}
             </div>
           )}
-          <Reactions />
+          <Reactions blog={blog} />
         </div>
         {blog.coverImage && (
           <Link
