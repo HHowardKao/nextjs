@@ -16,6 +16,9 @@ const NavBar = () => {
   const isLoggedIn = session.status === "authenticated";
   const path = usePathname();
   const router = useRouter();
+
+  const isFeedsPage = path.includes("/blog/feed");
+
   console.log("Session>>>", session);
   useEffect(() => {
     if (!isLoggedIn && path) {
@@ -38,7 +41,8 @@ const NavBar = () => {
             <MdNoteAlt size={24} />
             <div className="font-bold text-xl">WEBDEV.blog</div>
           </div>
-          <SearchInput />
+          {isFeedsPage && <SearchInput />}
+
           <div className="flex gap-5 sm:gap-8 items-center">
             <ThemeToggle />
             {isLoggedIn && <Notifications />}

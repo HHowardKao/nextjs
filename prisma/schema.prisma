@@ -15,6 +15,7 @@ model User {
   accounts      Account[]
   blogs         Blog[]
   claps Clap[]
+  bookmark Bookmark[]
 
  
   createdAt DateTime @default(now())
@@ -76,6 +77,7 @@ model Blog{
   coverImage String?
   tags String[]
   claps Clap[]
+  bookmark Bookmark[]
   isPublished Boolean @default(false) 
   createdAt DateTime @default(now())
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -83,6 +85,18 @@ model Blog{
 
 
 model Clap{
+  id String @id @default(cuid())
+  userId String
+  blogId String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blogId])
+}
+
+model Bookmark{
   id String @id @default(cuid())
   userId String
   blogId String

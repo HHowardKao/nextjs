@@ -48,6 +48,14 @@ export const getPublishedBlogs = async ({
             id: true,
           },
         },
+        bookmark: {
+          where: {
+            userId,
+          },
+          select: {
+            id: true,
+          },
+        },
       },
     });
 

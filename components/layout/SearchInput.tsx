@@ -25,7 +25,7 @@ const SearchInput = () => {
     };
     const url = queryString.stringifyUrl(
       {
-        url: "/blog/feed/1",
+        url: window.location.href,
         query: updatedQuery,
       },
       { skipNull: true, skipEmptyString: true }
@@ -35,10 +35,6 @@ const SearchInput = () => {
   const handleOnchange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setValue(e.target.value);
   };
-  const isFeedsPage = pathname.includes("/blog/feed");
-  if (!isFeedsPage) {
-    return null;
-  }
 
   return (
     <div className=" relative hidden sm:block">
