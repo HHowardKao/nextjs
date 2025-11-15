@@ -45,7 +45,10 @@ const UserButton = () => {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          <button className="flex items-center gap-2">
+          <button
+            onClick={() => router.push("/blog/bookmarks/1")}
+            className="flex items-center gap-2"
+          >
             <FaRegBookmark size={16} />
             Bookmark
           </button>
